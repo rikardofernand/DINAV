@@ -27,6 +27,7 @@
 %   Theta3     -- posição angular da junta 2
 
 
+
 %%
 clc, close all, clear all; 
 %

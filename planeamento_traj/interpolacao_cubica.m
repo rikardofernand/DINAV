@@ -3,7 +3,9 @@ function [theta,thetap, thetapp , t] = interpolacao_cubica(thetaini, thetaf,tf)
 %   Detailed explanation goes here
 global n
 a0=thetaini; %tetha inicial
+
 a1=0 ;
+
 a2=3/tf^2*(thetaf-thetaini);
 a3=-2/tf^3 *(thetaf-thetaini);
 

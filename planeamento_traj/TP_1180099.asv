@@ -13,7 +13,10 @@
 %         x1, y1, z1 – coordenadas iniciais da trajetória
 %         x2, y2, z2 – coordenadas intermédias da trajetória
 %         x3, y3, z3 – coordenadas finais da trajetória
-%         tf1,tf2 – intervalo de tempo para robô percorrer as trajetórias 
+%         tf1,tf2 – intervalo de tempo para robô percorrer as trajetórias
+%         entre as coordenadas inicias até à intermédia (tf1) e entre a
+%         coordenada intermédia e a final.
+%    
 %
 %  robô deverá ser representado num gráfico 3D, com os
 %  limites dos eixos escolhidos de forma adequada e
@@ -64,6 +67,7 @@ r=sqrt( (x-0).^2+(y-0).^2+(z-h).^2 ); %calculo do raio do volume de trabalho na 
 if h<=0||L1<=0||L2<=0 f=msgbox('Introduza apenas valores positivos de h, L1 eL2 ', 'Error','error');
 elseif L1<L2 f=msgbox('Intoduza L1 maior ou igual a L2 (para minimizar "constrains" nas juntas)', 'Error','error');
 elseif z<0 f=msgbox('Introduza apenas valores positivos de Z ', 'Error','error');
+elseif tf(1)<= 0 ||tf(2)<=0 f=msgbox('Introduza apenas valores positivos de t ', 'Error','error');
     %elseif r>maxlength || r<minlength f=msgbox('coordenadas finais XYZ fora do volume de trabalho do manipulador', 'Error','error')
     %elseif x==0 && y==0 &&r<maxlength f=msgbox('Dá origem a uma singularidade', 'Error','error')
 else
@@ -73,7 +77,7 @@ else
  
     for i=1:3  %3 posicoes (inicial, intermdédia e final) (uso da cinemática inversa)
         theta1(i)=atan2(y(i),x(i));
-            g=(x(i)^2+y(i)^2+(z(i)-h)^2-L1^2-L2^2)/(2*L1*L2);
+        g=(x(i)^2+y(i)^2+(z(i)-h)^2-L1^2-L2^2)/(2*L1*L2);
         theta3(i)=atan2(-sqrt(1-g^2),g);
         theta2(i)=atan2((z(i)-h),sqrt(x(i)^2+y(i)^2))-atan2(L2*sin(theta3(i)),L1+L2*cos(theta3(i)));
     end
@@ -93,24 +97,127 @@ else
     end
     
     
-    jk=1;
+   
     
     %cinematica direta a partir dos angulos obtidos acima
     for k=1:2 %tf1 trajetoria 1 e tf1 trajetoria 2
         
-        [x1(k,:),y1(k,:),z1(k,:),x2(k,:),y2(k,:),z2(k,:)]=cinematica_direta(theta1_aux(k,:),theta2_aux(k,:),theta3_aux(k,:));
+        [x1(k,:),y1(k,:),z1(k,:),x2(k,:),y2(k,:),z2(k,:),vx2(k,:),vy2(k,:),vz2(k,:)]=cinematica_direta(theta1_aux(k,:),theta2_aux(k,:),theta3_aux(k,:),theta1p_aux(k,:),theta2p_aux(k,:),theta3p_aux(k,:));
         
     end
     
+        for k=1:2
+        %calculo da velocidade no espaço operacional
+         %t_dot=diff(t(k,:);
+         %vx2(k,length(x2))=zeros,vy2(k,length(x2))=zeros,vz2(k,length(x2))=zeros;
+         %vx2(k,2:length(x2))=diff(x2(k,:)),vy2(k,2:length(y2))=diff(y2(k,:)),vz2(k,2:length(z2))=diff(z2(k,:));
+         % calculo da aceleracao
+         ax2(k,length(vx2))=zeros,ay2(k,length(vy2))=zeros,az2(k,length(vz2))=zeros;
+         ax2(k,2:length(vx2))=diff(vx2(k,:)),ay2(k,2:length(vy2))=diff(vy2(k,:)),az2(k,2:length(vz2))=diff(vz2(k,:));
+         
+        
+        end 
+    
+    
+   
+   
+    
     %plot(vx2,t)
     %graficos
+   
+    %% plot das posicoes, velocidades e aceleracoes das juntas
+    for j=1:2   
+     figure(2)
+        subplot(3,3,1),
+        %figure(10); %posicao angular das 3 juntas
+        hold on
+        plot(t(j,:),rad2deg(theta1_aux(j,:)), 'DisplayName','posição junta t1 e t2')
+        plot(t(j,:),rad2deg(theta2_aux(j,:)), 'DisplayName','posição junta 2')
+        plot(t(j,:),rad2deg(theta3_aux(j,:)), 'DisplayName','posição junta 3')
+        title('Posição theta')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('\theta ( º ) ','FontSize',14);
+        lgd = legend;
+        lgd.NumColumns = 2;
+        
+        figure(2)
+        subplot(3,3,3); %velocidade angular das 3 juntas
+        hold on
+        title('Velocidade angular')
+        plot(t(j,:),theta1p_aux(j,:)*180/pi,'DisplayName','velocidade junta 1')
+        plot(t(j,:),theta2p_aux(j,:)*180/pi,'DisplayName','velocidade junta 2')
+        plot(t(j,:),theta3p_aux(j,:)*180/pi,'DisplayName','velocidade junta 3')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('$\stackrel{.}{\theta }(^o/s)$','interpreter','latex','FontSize',14);
+        lgd = legend;
+        lgd.NumColumns = 2;
+        
+        figure(2); %aceleracao angular das 3 juntas
+        subplot(3,3,5)
+        hold on
+        title('aceleração angular')
+        plot(t(j,:),theta1pp_aux(j,:)*180/pi,'DisplayName','aceleração junta 1')
+        plot(t(j,:),theta2pp_aux(j,:)*180/pi,'DisplayName','aceleração junta 2')
+        plot(t(j,:),theta3pp_aux(j,:)*180/pi,'DisplayName','aceleração junta 3')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('$\stackrel{..}{\theta }(^o/s^2)$','interpreter','latex','FontSize',14);
+        lgd = legend;
+        lgd.NumColumns = 2;        
+       
+       
+        %posicao no espaco operacional
+        figure(2); %posicao nos 3 eixos cartesianos 
+        subplot(3,3,2)
+        hold on
+        title('posição no espaço operacional')
+        plot(t(j,:),x2(j,:),'DisplayName','posicao x na no manipulador')
+        plot(t(j,:),y2(j,:),'DisplayName','posicao y no manipulador')
+        plot(t(j,:),z2(j,:),'DisplayName','posicao z no manipulador')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('Posição (m)','FontSize',14','FontSize',14);
+        lgd = legend;
+        lgd.NumColumns = 2;
+        
+        %velocidade no espaco operacional
+        figure(2); %velocidade nos 3 eixos cartesianos
+        subplot(3,3,4)
+        hold on
+        title('velocidade no espaço operacional')
+        plot(t(j,:),vx2(j,:),'DisplayName','velocidade x  no manipulador')
+        plot(t(j,:),vy2(j,:),'DisplayName','velocidade y no manipulador')
+        plot(t(j,:),vz2(j,:),'DisplayName','velocidade z no manipulador')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('v (m/s)','FontSize',14','FontSize',14);
+        lgd = legend;
+        lgd.NumColumns = 2;
+        
+         %aceleracao no espaco operacional
+        figure(2); %velocidade nos 3 eixos cartesianos
+        subplot(3,3,6)
+        hold on
+        title('aceleração espaço operacional')
+        plot(t(j,:),ax2(j,:),'DisplayName',' x ')
+        plot(t(j,:),ay2(j,:),'DisplayName','aceleração y no manipulador')
+        plot(t(j,:),az2(j,:),'DisplayName','aceleração z no manipulador')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('a (m/s^2)','FontSize',14','FontSize',14);
+        if j==2 
+            lgd = legend, 
+            lgd.NumColumns = 2; 
+        end;
+        
+        
+    end
     
     
     
-    %Gráfico do robô manipulador   
+    
+    %Gráfico do robô manipulador
  for j=1:2
+          
     for i=1:length(x1)
-    figure(1)
+    figure(3)
+    %subplot(3,2,[2 4 6])
     view(127,33)
     trajetoria=plot3([0 0],[0 0],[0 h],'LineWidth',8,'Color',[0,0.45,0.74]);
     hold on
@@ -140,9 +247,12 @@ else
     big_ax=(h+L1+L2)*1.2;
     axis([-big_ax big_ax,-big_ax big_ax,0 big_ax]); %'square');
     grid on;
+    
     %pbaspect([1 1 1])
     %pause(1);
-        if(i<length(theta1_aux))
+     
+    
+    if(i<length(theta1_aux))
             w=tf(j)/n;
             pause(w);
             cla%(trajetoria) ;
@@ -151,50 +261,11 @@ else
     end
  
  end     
-     %% plot das posicoes, velocidades e aceleracoes das juntas
-        subplot(3,1,1),
-        figure(10); %posicao angular das 3 juntas
-        hold on
-        plot(t(k,:),rad2deg(theta1_aux(k,:)), 'DisplayName','posição junta 1')
-        plot(t(k,:),rad2deg(theta2_aux(k,:)), 'DisplayName','posição junta 2')
-        plot(t(k,:),rad2deg(theta3_aux(k,:)), 'DisplayName','posição junta 3')
-        title('Posição theta')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('\theta ( º ) ','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;
-        
-        subplot(3,1,2),
-        figure(20); %velocidade angular das 3 juntas
-        hold on
-        title('Velocidade angular')
-        plot(t(k,:),theta1p_aux(k,:)*180/pi,'DisplayName','velocidade junta 1')
-        plot(t(k,:),theta2p_aux(k,:)*180/pi,'DisplayName','velocidade junta 2')
-        plot(t(k,:),theta3p_aux(k,:)*180/pi,'DisplayName','velocidade junta 3')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('$\stackrel{.}{\theta }(^o/s)$','interpreter','latex','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;
-        
-        subplot(3,1,3)
-        figure(30); %aceleracao angular das 3 juntas
-        hold on
-        title('aceleração angular')
-        plot(t(k,:),theta1pp_aux(k,:)*180/pi,'DisplayName','aceleração junta 1')
-        plot(t(k,:),theta2pp_aux(k,:)*180/pi,'DisplayName','aceleração junta 2')
-        plot(t(k,:),theta3pp_aux(k,:)*180/pi,'DisplayName','aceleração junta 3')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('$\stackrel{..}{\theta }(^o/s^2)$','interpreter','latex','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;        
-        hold off
+     
           
         
     
-    
-    
-    jk=jk+1;
-
+   
     %delete(figure(2))
     %display dos ângulos e da posição final para cada uma das soluções
 %     f = figure;

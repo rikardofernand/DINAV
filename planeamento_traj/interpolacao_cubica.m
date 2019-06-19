@@ -13,7 +13,7 @@ t=0:tf/n:tf;
 
 for w=1:n+1
     theta(w)=a0+a1*t(w)+a2*t(w).^2+a3*t(w).^3;
-    thetap(w)=2*a2*t(w)+3*a3*t(w).^2;
+    thetap(w)=a1+2*a2*t(w)+3*a3*t(w).^2;
     thetapp(w)=2*a2+6*a3*t(w);
     
 end

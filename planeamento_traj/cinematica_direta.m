@@ -18,12 +18,6 @@ for i=1:length(theta1)
     y2(i)=(L1*cos(theta2(i))+ L2*(cos(theta2(i)+theta3(i)))) *sin(theta1(i));
     z2(i)= h + L1*sin(theta2(i)) + L2*sin(theta2(i)+theta3(i));
     
-     %calculo das velocidades x, y e z na  extremidade do manipulador
-      
-%     vx2(i)=(L1*cos(theta2p(i))+ L2*(cos(theta2p(i)+theta3p(i)))) *cos(theta1p(i));
-%     vy2(i)=(L1*cos(theta2p(i))+ L2*(cos(theta2p(i)+theta3p(i)))) *sin(theta1p(i));
-%     vz2(i)= h + L1*sin(theta2p(i)) + L2*sin(theta2p(i)+theta3p(i));
-
     
 end
 

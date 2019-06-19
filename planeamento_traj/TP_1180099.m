@@ -38,10 +38,10 @@ dims = [1 50];
 definput = {'1.6','1.5','1.5','0.5','1.1','0.6','1.1','1.35','1.63','-1.85','-1.42','1.95','10','15'};
 answer = inputdlg(prompt,dlgtitle,dims,definput);
 %%
- %define global functions   
+ %Variaveis globais   
  global h, global L1, global L2; 
  global n     
- n=40; %numero de pontos para a descretizacao da trajetoria
+ n=100; %numero de pontos para a descretizacao da trajetoria
 
 %% Definição das variaveis:
 h = str2num(answer{1});   %-- altura desde a base do manipulador até à junta 1
@@ -62,13 +62,18 @@ tf(2)=str2num(answer{14});%-- intervalo de tempo para robô percorrer a trajetóri
 %logical tests
 maxlength=L1+L2; %raio que define o volume de trabalho
 minlength=L1-L2; %Dexterous Workspace
-r=sqrt( (x-0).^2+(y-0).^2+(z-h).^2 ); %calculo do raio do volume de trabalho na junta 1
+r(1)=sqrt( (x(1)-0).^2+(y(1)-0).^2+(z(1)-h).^2 ); %calculo do raio do volume de trabalho na junta 2
+r(2)=sqrt( (x(2)-0).^2+(y(2)-0).^2+(z(2)-h).^2 );
+r(3)=sqrt( (x(3)-0).^2+(y(3)-0).^2+(z(3)-h).^2 );
 
 if h<=0||L1<=0||L2<=0 f=msgbox('Introduza apenas valores positivos de h, L1 eL2 ', 'Error','error');
 elseif L1<L2 f=msgbox('Intoduza L1 maior ou igual a L2 (para minimizar "constrains" nas juntas)', 'Error','error');
 elseif z<0 f=msgbox('Introduza apenas valores positivos de Z ', 'Error','error');
 elseif tf(1)<= 0 ||tf(2)<=0 f=msgbox('Introduza apenas valores positivos de t ', 'Error','error');
-    %elseif r>maxlength || r<minlength f=msgbox('coordenadas finais XYZ fora do volume de trabalho do manipulador', 'Error','error')
+elseif tf(1)>180 || tf(2)>180 f=msgbox('Tempo de trajetória demasiado longo. Introduza valores abaixo de 180 s', 'Error','error');
+elseif r(1)>maxlength || r(1)<minlength f=msgbox('coordenadas iniciais XYZ fora do volume de trabalho do manipulador', 'Error','error');
+elseif r(2)>maxlength || r(2)<minlength f=msgbox('coordenadas intermédias XYZ fora do volume de trabalho do manipulador', 'Error','error');    
+elseif r(3)>maxlength || r(3)<minlength f=msgbox('coordenadas intermédias XYZ fora do volume de trabalho do manipulador', 'Error','error');   
     %elseif x==0 && y==0 &&r<maxlength f=msgbox('Dá origem a uma singularidade', 'Error','error')
 else
 
@@ -108,110 +113,26 @@ else
     
         for k=1:2
         %calculo da velocidade no espaço operacional
-         %t_dot=diff(t(k,:)
-         vx2(k,length(x2))=zeros,vy2(k,length(x2))=zeros,vz2(k,length(x2))=zeros;
-         vx2(k,2:length(x2))=diff(x2(k,:)),vy2(k,2:length(y2))=diff(y2(k,:)),vz2(k,2:length(z2))=diff(z2(k,:));
-         % calculo da aceleracao
-         ax2(k,length(vx2))=zeros,ay2(k,length(vy2))=zeros,az2(k,length(vz2))=zeros;
-         ax2(k,2:length(vx2))=diff(vx2(k,:)),ay2(k,2:length(vy2))=diff(vy2(k,:)),az2(k,2:length(vz2))=diff(vz2(k,:));
+         t_dot(k,:)=diff(t(k,:));
          
-        
+         vx1(k,length(x1))=zeros; vy1(k,length(x1))=zeros;vz1(k,length(x1))=zeros;
+         vx1(k,2:length(x1))=diff(x1(k,:))./t_dot(k,:);vy1(k,2:length(y1))=diff(y1(k,:))./t_dot(k,:);vz1(k,2:length(z1))=diff(z1(k,:))./t_dot(k,:);
+         
+         vx2(k,length(x2))=zeros; vy2(k,length(x2))=zeros;vz2(k,length(x2))=zeros;
+         vx2(k,2:length(x2))=diff(x2(k,:))./t_dot(k,:);vy2(k,2:length(y2))=diff(y2(k,:))./t_dot(k,:);vz2(k,2:length(z2))=diff(z2(k,:))./t_dot(k,:);
+         
+         % calculo da aceleracao
+         ax1(k,length(vx1))=zeros; ay1(k,length(vy1))=zeros ; az1(k,length(vz1))=zeros;
+         ax1(k,2:length(vx1))=diff(vx1(k,:))./t_dot(k,:); ay1(k,2:length(vy1))=diff(vy1(k,:))./t_dot(k,:);az1(k,2:length(vz1))=diff(vz1(k,:))./t_dot(k,:);
+       
+         ax2(k,length(vx2))=zeros; ay2(k,length(vy2))=zeros ; az2(k,length(vz2))=zeros;
+         ax2(k,2:length(vx2))=diff(vx2(k,:))./t_dot(k,:); ay2(k,2:length(vy2))=diff(vy2(k,:))./t_dot(k,:);az2(k,2:length(vz2))=diff(vz2(k,:))./t_dot(k,:);
+         
         end 
+     
     
-    
-   
-   
-    
-    %plot(vx2,t)
-    %graficos
-   
-    %% plot das posicoes, velocidades e aceleracoes das juntas
-    for j=1:2   
-     figure(2)
-        subplot(3,3,1),
-        %figure(10); %posicao angular das 3 juntas
-        hold on
-        plot(t(j,:),rad2deg(theta1_aux(j,:)),'r', 'DisplayName','posição junta t1 e t2')
-        plot(t(j,:),rad2deg(theta2_aux(j,:)),'b', 'DisplayName','posição junta 2')
-        plot(t(j,:),rad2deg(theta3_aux(j,:)),'g', 'DisplayName','posição junta 3')
-        title('Posição theta')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('\theta ( º ) ','FontSize',14);
-        legend('posição junta para t1 e t2','cos(2x)','posição junta 3')
-        lgd.NumColumns = 2;
         
-        figure(2)
-        subplot(3,3,3); %velocidade angular das 3 juntas
-        hold on
-        title('Velocidade angular')
-        plot(t(j,:),theta1p_aux(j,:)*180/pi,'r','DisplayName','velocidade junta 1')
-        plot(t(j,:),theta2p_aux(j,:)*180/pi,'b','DisplayName','velocidade junta 2')
-        plot(t(j,:),theta3p_aux(j,:)*180/pi,'g','DisplayName','velocidade junta 3')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('$\stackrel{.}{\theta }(^o/s)$','interpreter','latex','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;
-        
-        figure(2); %aceleracao angular das 3 juntas
-        subplot(3,3,5)
-        hold on
-        title('aceleração angular')
-        plot(t(j,:),theta1pp_aux(j,:)*180/pi,'DisplayName','aceleração junta 1')
-        plot(t(j,:),theta2pp_aux(j,:)*180/pi,'DisplayName','aceleração junta 2')
-        plot(t(j,:),theta3pp_aux(j,:)*180/pi,'DisplayName','aceleração junta 3')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('$\stackrel{..}{\theta }(^o/s^2)$','interpreter','latex','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;        
-       
-       
-        %posicao no espaco operacional
-        figure(2); %posicao nos 3 eixos cartesianos 
-        subplot(3,3,2)
-        hold on
-        title('posição no espaço operacional')
-        plot(t(j,:),x2(j,:),'DisplayName','posicao x na no manipulador')
-        plot(t(j,:),y2(j,:),'DisplayName','posicao y no manipulador')
-        plot(t(j,:),z2(j,:),'DisplayName','posicao z no manipulador')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('Posição (m)','FontSize',14','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;
-        
-        %velocidade no espaco operacional
-        figure(2); %velocidade nos 3 eixos cartesianos
-        subplot(3,3,4)
-        hold on
-        title('velocidade no espaço operacional')
-        plot(t(j,:),vx2(j,:),'DisplayName','velocidade x  no manipulador')
-        plot(t(j,:),vy2(j,:),'DisplayName','velocidade y no manipulador')
-        plot(t(j,:),vz2(j,:),'DisplayName','velocidade z no manipulador')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('v (m/s)','FontSize',14','FontSize',14);
-        lgd = legend;
-        lgd.NumColumns = 2;
-        
-         %aceleracao no espaco operacional
-        figure(2); %velocidade nos 3 eixos cartesianos
-        subplot(3,3,6)
-        hold on
-        title('aceleração espaço operacional')
-        plot(t(j,:),ax2(j,:),'DisplayName',' x ')
-        plot(t(j,:),ay2(j,:),'DisplayName','aceleração y no manipulador')
-        plot(t(j,:),az2(j,:),'DisplayName','aceleração z no manipulador')
-        xlabel('{\it t} (s)','FontSize',12);
-        ylabel('a (m/s^2)','FontSize',14','FontSize',14);
-        if j==2 
-            lgd = legend, 
-            lgd.NumColumns = 2; 
-        end;
-        
-        
-    end
-    
-    
-    
-    
+    %%
     %Gráfico do robô manipulador
  for j=1:2
           
@@ -248,11 +169,8 @@ else
     axis([-big_ax big_ax,-big_ax big_ax,0 big_ax]); %'square');
     grid on;
     
-    %pbaspect([1 1 1])
-    %pause(1);
-     
-    
-    if(i<length(theta1_aux))
+        
+        if(i<length(theta1_aux))
             w=tf(j)/n;
             pause(w);
             cla%(trajetoria) ;
@@ -261,16 +179,139 @@ else
     end
  
  end     
+
+    
+    
+   
+    %% plot das posicoes, velocidades e aceleracoes das juntas
+    for j=1:2   
+        
+        %posicao angular das 3 juntas
+        figure(2)
+        subplot(3,3,1);        
+        hold on
+        plot(t(j,:),rad2deg(theta1_aux(j,:)),'r.', 'DisplayName','posição junta 1')
+        plot(t(j,:),rad2deg(theta2_aux(j,:)),'b.', 'DisplayName','posição junta 2')
+        plot(t(j,:),rad2deg(theta3_aux(j,:)),'g.', 'DisplayName','posição junta 3')
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        title('Posição angular')
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('\theta ( º ) ','FontSize',14);
+        legend('junta 1','junta 2','junta 3')
+        lgd.NumColumns = 2;
+                
+        %velocidade angular das 3 juntas
+        figure(2)
+        subplot(3,3,4); 
+        hold on
+        title('Velocidade angular')
+        plot(t(j,:),theta1p_aux(j,:)*180/pi,'r.','DisplayName','velocidade junta 1')
+        plot(t(j,:),theta2p_aux(j,:)*180/pi,'b.','DisplayName','velocidade junta 2')
+        plot(t(j,:),theta3p_aux(j,:)*180/pi,'g.','DisplayName','velocidade junta 3')
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('$\stackrel{.}{\theta }(^o/s)$','interpreter','latex','FontSize',14);
+        legend('junta 1','junta 2','junta 3');
+       %aceleracao angular das 3 juntas 
+        figure(2); 
+        subplot(3,3,7)
+        hold on
+        title('aceleração angular')
+        plot(t(j,:),theta1pp_aux(j,:)*180/pi,'r.','DisplayName','aceleração junta 1')
+        plot(t(j,:),theta2pp_aux(j,:)*180/pi,'b.','DisplayName','aceleração junta 2')
+        plot(t(j,:),theta3pp_aux(j,:)*180/pi,'g.','DisplayName','aceleração junta 3')
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('$\stackrel{..}{\theta }(^o/s^2)$','interpreter','latex','FontSize',14);
+        legend('junta 1','junta 2','junta 3');
+                 
+        %posicao no espaco operacional extremidade L1
+              
+        figure(2); 
+        subplot(3,3,2)
+        hold on
+        title('posição da extremidade de L1 no espaço operacional')
+        plot(t(j,:),x1(j,:),'c.','DisplayName','posicao x na no manipulador')
+        plot(t(j,:),y1(j,:),'m.','DisplayName','posicao y no manipulador')
+        plot(t(j,:),z1(j,:),'k.','DisplayName','posicao z no manipulador')
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('{\it p} (m)','FontSize',14','FontSize',14);
+        legend('pos x','pos y','pos z');
+        
+        
+         %velocidade da extremidade L1 no espaco operacional
+        figure(2); %velocidade nos 3 eixos cartesianos
+        subplot(3,3,5)
+        hold on
+        title('velocidade da extremidade de L1 no espaço operacional')
+        plot(t(j,:),vx1(j,:),'c.','DisplayName','velocidade x  no manipulador')
+        plot(t(j,:),vy1(j,:),'m.','DisplayName','velocidade y no manipulador')
+        plot(t(j,:),vz1(j,:),'k.','DisplayName','velocidade z no manipulador')
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('{\it v} (m/s)','FontSize',14','FontSize',14);
+        legend('v_x','v_y','v_z');
+        
+        %aceleracao garra do manipulador no espaco operacional
+        figure(2); 
+        subplot(3,3,8)
+        hold on
+        title('aceleração da extremidade de L1 no espaço operacional')
+        plot(t(j,:),ax1(j,:),'c.','DisplayName',' x ');
+        plot(t(j,:),ay1(j,:),'m.','DisplayName','aceleração y no manipulador');
+        plot(t(j,:),az1(j,:),'k.','DisplayName','aceleração z no manipulador');
+        if j==2 line=vline(tf(1),'k--'); end %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('{\it a} (m/s^2)','FontSize',14','FontSize',14);
+        legend('a_x','a_y','a_z');
+        
+                
+        %posição da garra do manipulador no espaço operacional       
+        figure(2); %posicao nos 3 eixos cartesianos 
+        subplot(3,3,3)
+        hold on
+        title('posição da garra do manipulador no espaço operacional')
+        plot(t(j,:),x2(j,:),'c.','DisplayName','posicao x na no manipulador')
+        plot(t(j,:),y2(j,:),'m.','DisplayName','posicao y no manipulador')
+        plot(t(j,:),z2(j,:),'k.','DisplayName','posicao z no manipulador')
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('{\it p} (m)','FontSize',14','FontSize',14);
+        legend('pos x','pos y','pos z');
+       
+        
+        %velocidade garra do manipulador no espaco operacional
+        figure(2); %velocidade nos 3 eixos cartesianos
+        subplot(3,3,6)
+        hold on
+        title('velocidade da garra do manipulador no espaço operacional')
+        plot(t(j,:),vx2(j,:),'c.','DisplayName','velocidade x  no manipulador')
+        plot(t(j,:),vy2(j,:),'m.','DisplayName','velocidade y no manipulador')
+        plot(t(j,:),vz2(j,:),'k.','DisplayName','velocidade z no manipulador')
+        if j==2 line=vline(tf(1),'k--'); end %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('{\it v} (m/s)','FontSize',14','FontSize',14);
+        legend('v_x','v_y','v_z');
+       
+        
+        %aceleracao garra do manipulador no espaco operacional
+        figure(2); %velocidade nos 3 eixos cartesianos
+        subplot(3,3,9)
+        hold on
+        title('aceleração da garra do manipulador espaço operacional')
+        plot(t(j,:),ax2(j,:),'c.','DisplayName',' x ');
+        plot(t(j,:),ay2(j,:),'m.','DisplayName','aceleração y no manipulador');
+        plot(t(j,:),az2(j,:),'k.','DisplayName','aceleração z no manipulador');
+        if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
+        xlabel('{\it t} (s)','FontSize',12);
+        ylabel('{\it a} (m/s^2)','FontSize',14','FontSize',14);
+        legend('a_x','a_y','a_z');
+          
+        
+    end
+     
      
           
         
-    
-   
-    %delete(figure(2))
-    %display dos ângulos e da posição final para cada uma das soluções
-%     f = figure;
-%     t = uitable('ColumnName', {'theta 1', 'theta 2', 'theta 3', 'xfinal','yfinal','zfinal'});
-%     drawnow;
-%     set(t, 'Data', pose)
-  
 end

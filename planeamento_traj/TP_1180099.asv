@@ -186,8 +186,7 @@ else
     
     
    
-    %% plot das posicoes, velocidades e aceleracoes no espaço das juntas e no espaço operacional
-
+    %% plot das posicoes, velocidades e aceleracoes das juntas
     for j=1:2   
         
         %posicao angular das 3 juntas
@@ -198,7 +197,7 @@ else
         plot(t(j,:),rad2deg(theta2_aux(j,:)),'b.', 'DisplayName','posição junta 2')
         plot(t(j,:),rad2deg(theta3_aux(j,:)),'g.', 'DisplayName','posição junta 3')
         if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
-        title('Posição angular no espaço das juntas')
+        title('Posição angular')
         xlabel('{\it t} (s)','FontSize',12);
         ylabel('\theta ( º ) ','FontSize',14);
         legend('junta 1','junta 2','junta 3')
@@ -208,7 +207,7 @@ else
         figure(2)
         subplot(3,3,4); 
         hold on
-        title('Velocidade angular no espaço das juntas')
+        title('Velocidade angular')
         plot(t(j,:),theta1p_aux(j,:)*180/pi,'r.','DisplayName','velocidade junta 1')
         plot(t(j,:),theta2p_aux(j,:)*180/pi,'b.','DisplayName','velocidade junta 2')
         plot(t(j,:),theta3p_aux(j,:)*180/pi,'g.','DisplayName','velocidade junta 3')
@@ -220,7 +219,7 @@ else
         figure(2); 
         subplot(3,3,7)
         hold on
-        title('Aceleração angular no espaço das juntas')
+        title('aceleração angular')
         plot(t(j,:),theta1pp_aux(j,:)*180/pi,'r.','DisplayName','aceleração junta 1')
         plot(t(j,:),theta2pp_aux(j,:)*180/pi,'b.','DisplayName','aceleração junta 2')
         plot(t(j,:),theta3pp_aux(j,:)*180/pi,'g.','DisplayName','aceleração junta 3')
@@ -234,7 +233,7 @@ else
         figure(2); 
         subplot(3,3,2)
         hold on
-        title('Posição da extremidade final do elo L1 no espaço operacional')
+        title('posição da extremidade final do elo L1 no espaço operacional')
         plot(t(j,:),x1(j,:),'c.','DisplayName','posicao x na no manipulador')
         plot(t(j,:),y1(j,:),'m.','DisplayName','posicao y no manipulador')
         plot(t(j,:),z1(j,:),'k.','DisplayName','posicao z no manipulador')
@@ -248,7 +247,7 @@ else
         figure(2); %velocidade nos 3 eixos cartesianos
         subplot(3,3,5)
         hold on
-        title('Velocidade da extremidade final do elo L1 no espaço operacional')
+        title('velocidade da extremidade final do elo L1 no espaço operacional')
         plot(t(j,:),vx1(j,:),'c.','DisplayName','velocidade x  no manipulador')
         plot(t(j,:),vy1(j,:),'m.','DisplayName','velocidade y no manipulador')
         plot(t(j,:),vz1(j,:),'k.','DisplayName','velocidade z no manipulador')
@@ -261,10 +260,10 @@ else
         figure(2); 
         subplot(3,3,8)
         hold on
-        title('Aceleração na extremidade final do elo L1 no espaço operacional')
-        plot(t(j,3:length(t)),ax1(j,3:length(ax1)),'c.','DisplayName',' x ');
-        plot(t(j,3:length(t)),ay1(j,3:length(ay1)),'m.','DisplayName','aceleração y no manipulador');
-        plot(t(j,3:length(t)),az1(j,3:length(ay1)),'k.','DisplayName','aceleração z no manipulador');
+        title('aceleração na extremidade final do elo L1 no espaço operacional')
+        plot(t(j,:),ax1(j,:),'c.','DisplayName',' x ');
+        plot(t(j,:),ay1(j,:),'m.','DisplayName','aceleração y no manipulador');
+        plot(t(j,:),az1(j,:),'k.','DisplayName','aceleração z no manipulador');
         if j==2 line=vline(tf(1),'k--'); end %desenha a linha 
         xlabel('{\it t} (s)','FontSize',12);
         ylabel('{\it a} (m/s^2)','FontSize',14','FontSize',14);
@@ -275,7 +274,7 @@ else
         figure(2); %posicao nos 3 eixos cartesianos 
         subplot(3,3,3)
         hold on
-        title('Posição da garra do manipulador no espaço operacional')
+        title('posição da garra do manipulador no espaço operacional')
         plot(t(j,:),x2(j,:),'c.','DisplayName','posicao x na no manipulador')
         plot(t(j,:),y2(j,:),'m.','DisplayName','posicao y no manipulador')
         plot(t(j,:),z2(j,:),'k.','DisplayName','posicao z no manipulador')
@@ -289,7 +288,7 @@ else
         figure(2); %velocidade nos 3 eixos cartesianos
         subplot(3,3,6)
         hold on
-        title('Velocidade da garra do manipulador no espaço operacional')
+        title('velocidade da garra do manipulador no espaço operacional')
         plot(t(j,:),vx2(j,:),'c.','DisplayName','velocidade x  no manipulador')
         plot(t(j,:),vy2(j,:),'m.','DisplayName','velocidade y no manipulador')
         plot(t(j,:),vz2(j,:),'k.','DisplayName','velocidade z no manipulador')
@@ -303,10 +302,10 @@ else
         figure(2); %velocidade nos 3 eixos cartesianos
         subplot(3,3,9)
         hold on
-        title('Aceleração da garra do manipulador espaço operacional')
-        plot(t(j,3:length(t)),ax2(j,3:length(ax2)),'c.','DisplayName',' x ');
-        plot(t(j,3:length(t)),ay2(j,3:length(ay2)),'m.','DisplayName','aceleração y no manipulador');
-        plot(t(j,3:length(t)),az2(j,3:length(az2)),'k.','DisplayName','aceleração z no manipulador');
+        title('aceleração da garra do manipulador espaço operacional')
+        plot(t(j,:),ax2(j,:),'c.','DisplayName',' x ');
+        plot(t(j,:),ay2(j,:),'m.','DisplayName','aceleração y no manipulador');
+        plot(t(j,:),az2(j,:),'k.','DisplayName','aceleração z no manipulador');
         if j==2 line=vline(tf(1),'k--'); end  %desenha a linha 
         xlabel('{\it t} (s)','FontSize',12);
         ylabel('{\it a} (m/s^2)','FontSize',14','FontSize',14);

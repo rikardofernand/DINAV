@@ -44,7 +44,7 @@ answer = inputdlg(prompt,dlgtitle,dims,definput);
  %Variáveis globais   
  global h, global L1, global L2; 
  global n     
- n=100; %numero de pontos para a descretizacao da trajetoria
+ n=70; %numero de pontos para a descretizacao da trajetoria
 
 %% Definição das variaveis:
 h = str2num(answer{1});   %-- altura desde a base do manipulador até à junta 1

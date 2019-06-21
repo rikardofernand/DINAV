@@ -7,22 +7,6 @@ global m2; global m3; global L1 ; global L2 ;
 
 m23=0;
 m34=0;
-% x2 = 0.5*L2*cos(theta2)*cos(theta1);
-% y2 = 0.5*L2*cos(theta2)*sen(theta1);
-% z2 = 0.5*L2*cos(theta2);
-% 
-% x23 = L2*cos(theta2)*cos(theta1);
-% y23 = L2*cos(theta2)*sen(theta1);
-% z23 = L2*sen(theta2);
-% 
-% x3 = (L2*cos(theta2)+0.5*L3*cos(theta2+theta3))*cos(theta1);
-% y3 = (L2*cos(theta2)+0.5*L3*cos(theta2+theta3))*sen(theta1);
-% z3 = L2*sen(theta2)+0.5*L3*sen(theta2+theta3);
-% 
-% x34 = (L2*cos(theta2)+L3cos(theta2+theta3))*cos(theta1);
-% y34 = (L2*cos(theta2)+L3*cos(theta2+theta3))*sen(theta1);
-% z34 = L2*sen(theta2)+L3*sen(theta2+theta3);
-
 g=9.8;
 
 Ma=0.5*m2+ m23 + m3 +m34;

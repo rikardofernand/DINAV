@@ -38,8 +38,8 @@ format short %
 %% Introduzir parâmetros iniciais
 prompt = {'Introduza h (m)','Introduza L1 (m)','Introduza L2 (m)',...
     'massa do elo 1 (kg)','massa do elo 2 (kg)','massa do elo 3 (kg)',...
-    'posição do centro de massa dos elo 1','posição do centro de massa dos elo 2',...
-    'posição do centro de massa dos elo 3'};
+    'posição do centro de massa do elo 1','posição do centro de massa do elo 2',...
+    'posição do centro de massa do elo 3'};
 dlgtitle = 'Parametros físicos do manipulador';
 dims = [1 100];
 definput = {'1.6','1.5','1.5','1.2','1.1','1.4','','',''};
@@ -58,7 +58,8 @@ answer2 = inputdlg(prompt,dlgtitle,dims,definput);
 %%
  %Variáveis globais   
  global h, global L1, global L2; 
- global n , global m2, global m3;    
+ global n , global m2, global m3;  
+ global d1, global d2, global d3;
  n=50; %numero de pontos para a descretizacao da trajetoria
 
 %% Definição das variaveis:
@@ -79,9 +80,9 @@ tf(2)=str2num(answer2{11});%-- intervalo de tempo para robô percorrer a trajetór
 m1= str2num(answer{4}); %-- massa do elo 1
 m2= str2num(answer{5}); %-- massa do elo 2
 m3= str2num(answer{6}); %-- massa do elo 3
-% r1= str2num(answer{7}); %-- posição dos centros de massa dos elos 1
-% r2= str2num(answer{8}); %-- posição dos centros de massa dos elos 2
-% r3= str2num(answer{9}); %-- posição dos centros de massa dos elos 3
+d1= str2num(answer{7}); %-- posição dos centros de massa dos elos 1
+d2= str2num(answer{8}); %-- posição dos centros de massa dos elos 2
+d3= str2num(answer{9}); %-- posição dos centros de massa dos elos 3
 %%
 %logical tests
 maxlength=L1+L2; %raio que define o volume de trabalho

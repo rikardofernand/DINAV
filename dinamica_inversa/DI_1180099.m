@@ -17,6 +17,7 @@
 %         x1, y1, z1 – coordenadas iniciais da trajetória
 %         x2, y2, z2 – coordenadas intermédias da trajetória
 %         x3, y3, z3 – coordenadas finais da trajetória
+%         
 %         tf1,tf2 – intervalo de tempo para robô percorrer as trajetórias
 %         entre as coordenadas inicias até à intermédia (tf1) e entre a
 %         coordenada intermédia e a final.
@@ -38,20 +39,21 @@ format short %
 %% Introduzir parâmetros iniciais
 prompt = {'Introduza h (m)','Introduza L1 (m)','Introduza L2 (m)',...
     'massa do elo 1 (kg)','massa do elo 2 (kg)','massa do elo 3 (kg)',...
+    'massa do atuador do cotovelo (kg) [zero por omissão]',' massas do punho, da garra e da carga (kg) [zero por omissão]'...
     'posição do centro de massa do elo 1','posição do centro de massa do elo 2',...
     'posição do centro de massa do elo 3'};
 dlgtitle = 'Parametros físicos do manipulador';
 dims = [1 100];
-definput = {'1.6','1.5','1.5','1.2','1.1','1.4','','',''};
+definput = {'1','1','1','1','1','1','0','0','','',''};
 answer = inputdlg(prompt,dlgtitle,dims,definput);
 
 prompt = {'Introduza x1 inicial (m)',...
     'Introduza y1 inicial (m)','Introduza z1 inicial(m)','Introduza x2 intermédio (m)',...
     'Introduza y2 intermédio (m)','Introduza z2 intermédio(m)','Introduza x3 final (m)',...
     'Introduza y3 final (m)','Introduza z3 final (m)','tf1 (s) - intervalo de tempo (em segundos) para percorrer a trajectória 1','tf2 (s)- intervalo de tempo (em segundos) para percorrer a trajectória 2'};
-dlgtitle = 'Dados da trajectoória';
+dlgtitle = 'Dados da trajetória';
 dims = [1 100];
-definput = {'0.5','1.1','0.6','1.1','1.35','1.63','-1.85','-1.42','1.95','10','15'};
+definput = {'1','1','1','0','1','1','1','0','1','2','3'};
 answer2 = inputdlg(prompt,dlgtitle,dims,definput);
 
 
@@ -60,6 +62,7 @@ answer2 = inputdlg(prompt,dlgtitle,dims,definput);
  global h, global L1, global L2; 
  global n , global m2, global m3;  
  global d1, global d2, global d3;
+ global m23; global m34;
  n=50; %numero de pontos para a descretizacao da trajetoria
 
 %% Definição das variaveis:
@@ -80,9 +83,11 @@ tf(2)=str2num(answer2{11});%-- intervalo de tempo para robô percorrer a trajetór
 m1= str2num(answer{4}); %-- massa do elo 1
 m2= str2num(answer{5}); %-- massa do elo 2
 m3= str2num(answer{6}); %-- massa do elo 3
-d1= str2num(answer{7}); %-- posição dos centros de massa dos elos 1
-d2= str2num(answer{8}); %-- posição dos centros de massa dos elos 2
-d3= str2num(answer{9}); %-- posição dos centros de massa dos elos 3
+m23= str2num(answer{7}); %massa do atuador do cotovelo
+m34= str2num(answer{8});%massas do punho, da garra e da carga
+d1= str2num(answer{9}); %-- posição dos centros de massa dos elos 1
+d2= str2num(answer{10}); %-- posição dos centros de massa dos elos 2
+d3= str2num(answer{11}); %-- posição dos centros de massa dos elos 3
 %%
 %logical tests
 maxlength=L1+L2; %raio que define o volume de trabalho
@@ -99,6 +104,7 @@ elseif tf(1)>180 || tf(2)>180 f=msgbox('Tempo de trajetória demasiado longo. Int
 elseif r(1)>maxlength || r(1)<minlength f=msgbox('coordenadas iniciais XYZ fora do volume de trabalho do manipulador', 'Error','error');
 elseif r(2)>maxlength || r(2)<minlength f=msgbox('coordenadas intermédias XYZ fora do volume de trabalho do manipulador', 'Error','error');    
 elseif r(3)>maxlength || r(3)<minlength f=msgbox('coordenadas intermédias XYZ fora do volume de trabalho do manipulador', 'Error','error');   
+
 %elseif x==0 && y==0 &&r<maxlength f=msgbox('Dá origem a uma singularidade', 'Error','error')
 else
 
@@ -198,7 +204,9 @@ else
     trajetoria=plot3(xlinha,ylinha,zlinha,'r','LineWidth',3);
     
     big_ax=(h+L1+L2)*1.2;
-    axis([-big_ax big_ax,-big_ax big_ax,0 big_ax]); %'square');
+    max_aux(1)=abs(max(x1(:)));max_aux(2)=abs(max(y1(:)));max_aux(3)=abs(max(z1(:)));max_aux(4)=abs(max(x2(:)));max_aux(5)=abs(max(y2(:)));max_aux(6)=abs(max(z2(:)));
+    axis_max=(max(max_aux))*1.2;
+    axis([-axis_max axis_max,-axis_max axis_max,-axis_max axis_max]); %'square');
     grid on;
     
         
